@@ -101,10 +101,12 @@ class Auth0Connector:
                     return
                 events = resp.json()
                 if 'statusCode' in events:
-                    raise Exception (events.statuscode)
+                    raise Exception (events['error'])
             except Exception as err:
                 error = True
                 count+=1
+                if(err == 'Too Many Requests'):
+                    time.sleep(1)
                 logging.error("Something wrong. Exception error text: {}".format(err))
                 if count > self.retry:
                     logging.error("Exceeded maximum Retries")
@@ -136,9 +138,14 @@ class Auth0Connector:
                     try:
                         error=False
                         resp = requests.get(next_uri, headers=self.header)
+                        events = resp.json()
+                        if 'statusCode' in events:
+                            raise Exception (events['error'])
                     except Exception as err:
                         error = True
                         count+=1
+                        if(err == 'Too Many Requests'):
+                            time.sleep(1)
                         logging.error("Something wrong. Exception error text: {}".format(err))
                         if count > self.retry:
                             logging.error("Exceeded maximum Retries")
