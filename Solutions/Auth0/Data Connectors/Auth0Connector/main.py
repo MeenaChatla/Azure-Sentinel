@@ -95,6 +95,13 @@ class Auth0Connector:
             try:
                 error=False
                 resp = requests.get(self.uri, headers=self.header, params=params)
+                if not resp.json():
+                #return last_log_id, []
+                    self.update_statemarker_file(config, last_log_id, [])
+                    return
+                events = resp.json()
+                if 'statusCode' in events:
+                    raise Exception (events.statuscode)
             except Exception as err:
                 error = True
                 count+=1
